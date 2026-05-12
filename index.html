@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Japanese Expansion in East Asia, 1931–1945: An Interactive Timeline</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --panel: #1a212b;
+    --accent: #c0392b;
+    --accent2: #d4a017;
+    --text: #e8e6e1;
+    --muted: #9aa0a6;
+    --line: #4a5560;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  header {
+    padding: 40px 20px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #1a212b 0%, #0f1419 100%);
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 2.1em;
+    letter-spacing: 0.5px;
+    color: var(--accent2);
+  }
+  header p {
+    margin: 0 auto;
+    max-width: 760px;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.95em;
+  }
+  .container {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    gap: 30px;
+  }
+  .timeline {
+    flex: 0 0 380px;
+    position: relative;
+    border-left: 3px solid var(--accent);
+    padding-left: 0;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+  .timeline::-webkit-scrollbar { width: 8px; }
+  .timeline::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+  .event {
+    position: relative;
+    padding: 12px 14px 12px 30px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border-radius: 0 6px 6px 0;
+  }
+  .event::before {
+    content: "";
+    position: absolute;
+    left: -9px;
+    top: 18px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 3px solid var(--accent);
+    transition: all 0.25s ease;
+  }
+  .event:hover {
+    background: rgba(212,160,23,0.08);
+  }
+  .event:hover::before, .event.active::before {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    transform: scale(1.2);
+  }
+  .event.active {
+    background: rgba(192,57,43,0.15);
+  }
+  .event .date {
+    font-size: 0.78em;
+    color: var(--accent2);
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .event .title {
+    font-size: 1em;
+    margin-top: 3px;
+    color: var(--text);
+  }
+  .detail {
+    flex: 1;
+    background: var(--panel);
+    border-radius: 8px;
+    padding: 35px 40px;
+    min-height: 70vh;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    border: 1px solid var(--line);
+  }
+  .detail h2 {
+    margin-top: 0;
+    color: var(--accent2);
+    font-size: 1.7em;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+  }
+  .detail .meta {
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+  }
+  .detail p { margin: 0 0 16px; text-align: justify; }
+  .detail .historiography {
+    margin-top: 25px;
+    padding: 18px 22px;
+    background: rgba(212,160,23,0.06);
+    border-left: 4px solid var(--accent2);
+    border-radius: 0 6px 6px 0;
+  }
+  .detail .historiography h3 {
+    margin: 0 0 10px;
+    color: var(--accent2);
+    font-size: 1.05em;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .detail .historiography p {
+    font-size: 0.95em;
+    color: #d6d4cf;
+  }
+  .placeholder {
+    color: var(--muted);
+    font-style: italic;
+    text-align: center;
+    margin-top: 100px;
+  }
+  @media (max-width: 900px) {
+    .container { flex-direction: column; }
+    .timeline { flex: none; max-height: none; }
+  }
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 0.85em;
+    border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Japanese Expansion in East Asia, 1931–1945</h1>
+  <p>An interactive historical timeline tracing the trajectory of Imperial Japanese expansionism — from the Mukden Incident to the surrender aboard the USS Missouri — with academic commentary and historiographical reflection.</p>
+</header>
+
+<div class="container">
+  <div class="timeline" id="timeline"></div>
+  <div class="detail" id="detail">
+    <div class="placeholder">Select an event from the timeline to view a detailed historical analysis.</div>
+  </div>
+</div>
+
+<footer>Compiled with reference to the historiography of Akira Iriye, John W. Dower, Herbert P. Bix, Iris Chang, Rana Mitter, Eri Hotta, Louise Young, and Mark Peattie.</footer>
+
+<script>
+const events = [
+  {
+    date: "18 September 1931",
+    title: "Mukden Incident",
+    location: "Mukden (Shenyang), Manchuria",
+    body: `<p>The detonation of a small explosive charge along the South Manchurian Railway near Liutiaohu, staged by officers of the Kwantung Army, served as the pretext for the rapid military occupation of Manchuria. Although officially framed as a defensive response to Chinese sabotage, the operation had been meticulously orchestrated by Colonel Ishiwara Kanji and Colonel Itagaki Seishirō, who circumvented both Tokyo and the civilian cabinet of Wakatsuki Reijirō.</p>
+    <p>The incident exposed a structural pathology of the Meiji constitution: the autonomy of the field armies, the doctrine of <em>gekokujō</em> (insubordination from below), and the inability of civilian government to restrain the military. Within five months, the resource-rich region — comprising over one million square kilometres — had fallen under Japanese control, transforming Northeast Asia's geopolitical order and providing the demographic and industrial base for subsequent expansion.</p>`,
+    historiography: `Louise Young (<em>Japan's Total Empire</em>, 1998) frames Manchuria not merely as a military conquest but as a "total empire" — a project that mobilised metropolitan Japanese society through propaganda, settler colonialism, and economic planning. Akira Iriye argues that the Mukden Incident inaugurated the unravelling of the Washington Treaty system and marked the moment when Japan abandoned its post-Versailles cooperative diplomacy for autonomous regionalism.`
+  },
+  {
+    date: "1 March 1932",
+    title: "Founding of Manchukuo",
+    location: "Changchun (renamed Hsinking)",
+    body: `<p>The proclamation of the State of Manchukuo, with the last Qing emperor Puyi installed as figurehead chief executive (later emperor in 1934), represented a novel experiment in colonial governance: ostensibly an independent multi-ethnic state ("harmony of the five races"), in practice a puppet regime administered by the Kwantung Army through the General Affairs State Council and dominated by bureaucrats such as Kishi Nobusuke.</p>
+    <p>The League of Nations dispatched the Lytton Commission, whose 1932 report refused to recognise the legitimacy of the new state. Japan's response — the famous walkout led by Matsuoka Yōsuke at Geneva in February 1933 — signalled its disengagement from the post-war international order. Manchukuo became a laboratory for "developmental" authoritarianism, anticipating in many respects the technocratic governance of postwar Japan itself.</p>`,
+    historiography: `Prasenjit Duara (<em>Sovereignty and Authenticity</em>, 2003) situates Manchukuo within global discourses of anti-imperial nationalism and modernity, complicating older portrayals of it as a mere puppet state. Yamamuro Shin'ichi's <em>Manchuria Under Japanese Dominion</em> describes it as a "chimera" — simultaneously colony, frontier, and ideological utopia.`
+  },
+  {
+    date: "31 May 1933",
+    title: "Tanggu Truce",
+    location: "Tanggu, near Tianjin",
+    body: `<p>Following the Japanese seizure of Jehol (Rehe) province and incursions south of the Great Wall, the Tanggu Truce established a demilitarised zone in eastern Hebei and effectively forced Nationalist China's recognition of Japanese gains. Chiang Kai-shek's acceptance reflected his strategic doctrine of "first internal pacification, then external resistance" (<em>annei rangwai</em>) — prioritising the encirclement campaigns against the Chinese Communists.</p>
+    <p>The truce inaugurated a four-year interval of creeping encroachment in North China, during which the Kwantung Army manufactured a series of autonomous regimes — the East Hebei Autonomous Council (1935), the Mongol Military Government — designed to detach northern provinces from Nanjing's authority.</p>`,
+    historiography: `Rana Mitter (<em>Forgotten Ally</em>, 2013) revises older Anglophone depictions of Chiang as merely appeasing Japan, emphasising the constraints under which the Nationalist government operated. Parks Coble's work on collaboration and resistance highlights how Japanese "salami tactics" in this period made full-scale war structurally probable.`
+  },
+  {
+    date: "26 February 1936",
+    title: "The Ni-Ni-Roku Incident",
+    location: "Tokyo",
+    body: `<p>Although a domestic political event, the attempted coup by young officers of the Imperial Way faction (Kōdōha) had decisive consequences for Japan's foreign trajectory. The assassinations of Finance Minister Takahashi Korekiyo and other moderates eliminated the principal restraints on military budgets. The suppression of the rebellion ironically empowered the rival Control Faction (Tōseiha) under Tōjō Hideki and Nagata Tetsuzan's legacy — those who favoured a planned, total-war economy and continental expansion.</p>
+    <p>The Hirota Kōki cabinet that followed accepted the army's demand that war and navy ministers be active-duty officers, granting the military a constitutional veto over civilian government.</p>`,
+    historiography: `Herbert Bix (<em>Hirohito and the Making of Modern Japan</em>, 2000) argues that the Emperor's decisive intervention against the rebels demonstrates the active, rather than passive, role of the throne in shaping policy — a thesis that challenges the postwar "monologue" narrative of Hirohito as a powerless constitutional monarch.`
+  },
+  {
+    date: "7 July 1937",
+    title: "Marco Polo Bridge Incident",
+    location: "Lugouqiao, near Beijing",
+    body: `<p>A confused nocturnal firefight between Japanese garrison troops and Chinese soldiers near the Marco Polo Bridge escalated within weeks into full-scale war. Unlike the Mukden Incident, the Lugouqiao clash was not premeditated; it was the subsequent response — the rapid dispatch of three divisions by the Konoe cabinet and the refusal of the Chinese Nationalist government to grant further concessions — that transformed a local skirmish into the Second Sino-Japanese War.</p>
+    <p>Chiang Kai-shek's speech at Lushan on 17 July, declaring that "the limits of endurance had been reached," signified a strategic decision to resist regardless of military disadvantage. The war that followed would claim, by the most conservative estimates, fourteen to twenty million Chinese lives.</p>`,
+    historiography: `Mitter and Hans van de Ven (<em>War and Nationalism in China</em>, 2003) have led a historiographical revolution emphasising the centrality of the Chinese war effort to the global conflict, displacing earlier Eurocentric framings. Eri Hotta (<em>Japan 1941</em>) traces how the war's open-ended quagmire structurally pushed Japan toward the Pacific gamble of 1941.`
+  },
+  {
+    date: "13 Dec 1937 – Jan 1938",
+    title: "The Nanjing Massacre",
+    location: "Nanjing, China",
+    body: `<p>Following the collapse of Chinese defences, the Japanese Central China Area Army under General Matsui Iwane (operationally commanded by Prince Asaka Yasuhiko) entered the Nationalist capital. Over six weeks, mass killings of disarmed prisoners and civilians, systematic sexual violence against women, and widespread arson devastated the city. The International Military Tribunal for the Far East later estimated 200,000 deaths; Chinese scholarship typically places the figure at over 300,000.</p>
+    <p>The atrocity has acquired vast symbolic weight as the paradigmatic instance of Japanese war crimes in China. It exposed the consequences of an institutional culture that emphasised aggressive infantry tactics, dehumanising propaganda, and the absence of mechanisms for prisoner handling, compounded by the breakdown of discipline among exhausted troops.</p>`,
+    historiography: `Iris Chang's <em>The Rape of Nanking</em> (1997) restored the event to global memory but has been criticised by scholars such as Joshua Fogel and Daqing Yang for methodological imprecision. Takashi Yoshida's <em>The Making of the "Rape of Nanking"</em> (2006) traces how memory of the massacre has been instrumentalised in Sino-Japanese politics. The denialist current in Japan, though scholarly marginal, continues to fuel diplomatic frictions.`
+  },
+  {
+    date: "June – October 1938",
+    title: "Battle of Wuhan",
+    location: "Central China",
+    body: `<p>The four-and-a-half-month campaign for the Yangtze metropolis involved over one million Chinese defenders against approximately 350,000 Japanese troops. Although Wuhan fell on 27 October, the battle inflicted enormous casualties on Japan and exhausted its offensive momentum. Chiang's strategy — articulated as "trading space for time" (<em>yi kongjian huan shijian</em>) — succeeded in drawing the Japanese deep into the Chinese interior, where logistical lines became unsustainable.</p>
+    <p>After Wuhan, the war shifted into a protracted stalemate. Japan controlled cities and railways; the Nationalists retreated to Chongqing; the Communists expanded base areas in the rural north. The "magic bullet" strategy of a single knockout blow had failed.</p>`,
+    historiography: `Hans van de Ven (<em>China at War</em>, 2017) argues that Wuhan represented the strategic turning point of the war, comparable in significance to Stalingrad in the European theatre. Tobe Ryōichi's work on Japanese operational planning emphasises that Tokyo never developed a coherent theory of victory once decisive battle proved impossible.`
+  },
+  {
+    date: "May – September 1939",
+    title: "Battle of Khalkhin Gol (Nomonhan)",
+    location: "Mongolian–Manchurian border",
+    body: `<p>An undeclared border war between the Kwantung Army and Soviet–Mongolian forces under Georgy Zhukov ended in catastrophic defeat for Japan. The encirclement of the 23rd Division demonstrated decisively that Japanese armour, doctrine, and combined-arms capability were inferior to Red Army standards.</p>
+    <p>The strategic consequences were profound. The "Strike North" (<em>hokushin-ron</em>) faction, which envisioned war with the Soviet Union to seize Siberian resources, lost its argument to the "Strike South" (<em>nanshin-ron</em>) faction advocating expansion into Southeast Asia. Nomonhan thus indirectly directed Japan's future trajectory toward Pearl Harbor.</p>`,
+    historiography: `Alvin Coox's monumental <em>Nomonhan: Japan Against Russia, 1939</em> (1985) remains the definitive study, arguing that the defeat fundamentally restructured Japanese strategic thought. Stuart Goldman (<em>Nomonhan, 1939</em>) emphasises its global significance as the hinge between the European and Pacific theatres of WWII.`
+  },
+  {
+    date: "27 September 1940",
+    title: "Tripartite Pact",
+    location: "Berlin",
+    body: `<p>Foreign Minister Matsuoka Yōsuke signed the alliance with Nazi Germany and Fascist Italy, committing the three powers to mutual assistance if attacked by a power not already at war. The pact, intended primarily to deter American intervention, instead accelerated the deterioration of US–Japanese relations.</p>
+    <p>Days earlier, Japanese troops had entered northern French Indochina under an agreement extorted from the Vichy authorities — providing airbases for operations against the Burma Road and signalling intent toward the resource-rich European colonies of Southeast Asia.</p>`,
+    historiography: `Akira Iriye (<em>The Origins of the Second World War in Asia and the Pacific</em>, 1987) emphasises that Matsuoka misread the diplomatic equation: Hitler did not consult Tokyo before invading the USSR in 1941, while the pact alienated Washington without producing meaningful German military cooperation in Asia. Hotta describes the alliance as a "diplomatic suicide pact."`
+  },
+  {
+    date: "August 1940 – 1941",
+    title: "The Hundred Regiments Offensive & Three Alls Policy",
+    location: "North China",
+    body: `<p>The large-scale Communist offensive (August–December 1940) under Peng Dehuai briefly demonstrated guerrilla capability against Japanese garrisons. The Japanese response — the <em>Sankō Sakusen</em> ("Three Alls": kill all, burn all, loot all) — devastated rural North China. By some estimates, the population of Communist base areas fell from 44 million to 25 million.</p>
+    <p>The brutality reflected an emerging counter-insurgency doctrine that, lacking sufficient troops to occupy the countryside, sought to deny the guerrillas their sustaining environment through systematic depopulation and infrastructure destruction.</p>`,
+    historiography: `Chalmers Johnson's <em>Peasant Nationalism and Communist Power</em> (1962) controversially argued that Japanese atrocities radicalised the peasantry and were the principal cause of Communist victory in 1949 — a thesis later contested by Mark Selden and Chen Yung-fa, who emphasised CCP institutional building.`
+  },
+  {
+    date: "26 July 1941",
+    title: "American Asset Freeze & Oil Embargo",
+    location: "Washington / Tokyo",
+    body: `<p>In response to Japan's occupation of southern French Indochina (24 July), President Roosevelt froze Japanese assets in the United States; Britain and the Netherlands East Indies followed. The de facto consequence — a total oil embargo — confronted Japan with a strategic ultimatum. With reserves sufficient for perhaps eighteen months of normal consumption, Japan faced a choice between withdrawal from China (politically impossible for the army) or seizure of the Dutch East Indies (which meant war with the Anglo-American powers).</p>
+    <p>Subsequent negotiations through Ambassador Nomura Kichisaburō, including the Hull Note of 26 November demanding withdrawal from China and Indochina, were interpreted in Tokyo as a non-negotiable ultimatum.</p>`,
+    historiography: `Jonathan Utley (<em>Going to War with Japan</em>) and Edward Miller (<em>Bankrupting the Enemy</em>, 2007) have demonstrated that the total embargo was implemented by mid-level officials (notably Dean Acheson) somewhat beyond Roosevelt's intent, but FDR allowed it to stand. Hotta's <em>Japan 1941</em> reveals through the imperial conference records how Japanese leaders gambled on war they privately considered unwinnable, paralysed by institutional inertia and consensus politics.`
+  },
+  {
+    date: "7–8 December 1941",
+    title: "Pearl Harbor & the Southern Operation",
+    location: "Hawaii, Malaya, Philippines, Hong Kong",
+    body: `<p>Admiral Yamamoto Isoroku's carrier strike against the US Pacific Fleet at Pearl Harbor coincided with coordinated assaults across Southeast Asia — landings at Kota Bharu in Malaya, attacks on the Philippines and Hong Kong, the sinking of HMS <em>Prince of Wales</em> and <em>Repulse</em>. The opening moves were tactically brilliant and strategically catastrophic: they unified American public opinion and committed Japan to a war of attrition against an industrial colossus with roughly ten times its productive capacity.</p>
+    <p>Yamamoto, who had opposed war with the United States, reportedly feared that Japan had "awakened a sleeping giant and filled him with a terrible resolve" — a phrase likely apocryphal but capturing his strategic pessimism.</p>`,
+    historiography: `The "back door to war" thesis (Charles Beard, later revisionists) — that Roosevelt manoeuvred Japan into firing the first shot — has been comprehensively rejected by mainstream scholarship (Gordon Prange, Roberta Wohlstetter). Sadao Asada and Mark Peattie emphasise the irrationality embedded in Japanese strategic culture, particularly the belief that a "decisive battle" could compel American negotiation.`
+  },
+  {
+    date: "Feb – May 1942",
+    title: "Fall of Singapore and the Greater East Asia Co-Prosperity Sphere",
+    location: "Southeast Asia",
+    body: `<p>The surrender of 80,000 British and Commonwealth troops at Singapore on 15 February 1942 — Churchill called it "the worst disaster" in British military history — symbolised the collapse of European colonial power in Asia. By May, Japan controlled Malaya, the Dutch East Indies, Burma, the Philippines, and much of New Guinea.</p>
+    <p>The ideological framing of conquest as Asian liberation from Western imperialism — the Greater East Asia Co-Prosperity Sphere — contained a real propagandistic appeal that resonated with anti-colonial movements (Aung San in Burma, Sukarno in Indonesia, Bose's INA). Yet Japanese occupation policy, driven by extractive resource demands and racialised hierarchies placing Japanese at the apex, quickly disabused most subject populations of their initial hopes.</p>`,
+    historiography: `Christopher Bayly and Tim Harper (<em>Forgotten Armies</em>, 2004) trace how the collapse of European empires in 1942 made decolonisation inevitable regardless of the war's outcome. Joyce Lebra and Goto Ken'ichi have explored the complex collaborationist–nationalist dynamics in occupied territories. The Co-Prosperity Sphere remains a contested symbol — instrument of empire, yet inadvertent midwife of Asian independence.`
+  },
+  {
+    date: "4–7 June 1942",
+    title: "Battle of Midway",
+    location: "Central Pacific",
+    body: `<p>The destruction of four Japanese fleet carriers — <em>Akagi</em>, <em>Kaga</em>, <em>Sōryū</em>, and <em>Hiryū</em> — in a single engagement reversed the carrier balance in the Pacific. American signals intelligence (the breaking of JN-25), combined with operational miscalculation by Admiral Nagumo and the destruction of irreplaceable aircrews, ended Japan's strategic offensive capability barely six months after Pearl Harbor.</p>
+    <p>The defeat was concealed from the Japanese public and even much of the navy. Crews of surviving ships were quarantined upon return to Japan.</p>`,
+    historiography: `Jonathan Parshall and Anthony Tully (<em>Shattered Sword</em>, 2005) have substantially revised the standard Walter Lord / Gordon Prange narrative, demonstrating that "miraculous" American victory rests heavily on Japanese operational failures — particularly the structural rigidity of Japanese carrier doctrine — rather than purely fortuitous timing.`
+  },
+  {
+    date: "Aug 1942 – Feb 1943",
+    title: "Guadalcanal Campaign",
+    location: "Solomon Islands",
+    body: `<p>The six-month struggle for Guadalcanal — described by participants as "the island of death" (<em>Ga-tō</em>) — represented the first sustained American offensive of the war. Japan committed forces piecemeal, losing approximately 31,000 men (the majority to disease and starvation) against 7,000 American deaths. Naval engagements in Ironbottom Sound cost both sides heavily, but Japanese losses in trained pilots and warships were strategically irreplaceable.</p>
+    <p>After Guadalcanal, Japan's grand strategy shifted from offensive expansion to "absolute defence" of an inner perimeter — an admission, however unstated, that decisive victory was no longer possible.</p>`,
+    historiography: `Richard Frank's <em>Guadalcanal</em> (1990) remains authoritative. Edward Drea (<em>Japan's Imperial Army</em>, 2009) demonstrates how the campaign exposed the army's chronic logistical incompetence and its institutional inability to disengage from untenable positions.`
+  },
+  {
+    date: "March – July 1944",
+    title: "U-Gō: The Imphal–Kohima Disaster",
+    location: "Indo-Burmese frontier",
+    body: `<p>General Mutaguchi Renya's invasion of British India, undertaken with insufficient logistics and predicated on capturing British supplies, ended in one of the most catastrophic defeats in Japanese military history. Of approximately 85,000 troops committed, some 53,000 became casualties, the majority succumbing to starvation and disease during the monsoon retreat. The Subhas Chandra Bose-led Indian National Army, fighting alongside the Japanese, was effectively destroyed.</p>`,
+    historiography: `Robert Lyman and Christopher Bayly have re-centred the Burma campaign as decisive to the end of British India, complicating simple narratives of Japanese aggression versus Allied liberation. The Indian dimension — the INA, Bose's nationalist mobilisation — has been recovered by historians such as Sugata Bose, recasting the war's meaning in South Asian memory.`
+  },
+  {
+    date: "June – November 1944",
+    title: "Saipan and the Fall of the Tōjō Cabinet",
+    location: "Mariana Islands",
+    body: `<p>The fall of Saipan (9 July 1944) brought the Japanese home islands within range of B-29 strategic bombers and precipitated the resignation of General Tōjō Hideki's government. The mass suicides of Japanese civilians at Marpi Point — leaping from cliffs rather than surrender — foreshadowed the radicalisation of resistance to come at Iwo Jima and Okinawa.</p>
+    <p>Concurrently in China, Operation Ichi-Gō (April–December 1944) — the largest Japanese ground offensive of the war — overran much of southern China and destroyed several Nationalist armies, but absorbed forces desperately needed in the Pacific and accelerated the political collapse of the Kuomintang regime.</p>`,
+    historiography: `Hara Takeshi and Tobe Ryōichi have argued that Ichi-Gō, though tactically successful, represented a strategic absurdity disconnected from the war's true centre of gravity. Hans van de Ven shows how the offensive's success against the Nationalists indirectly facilitated the eventual Communist victory in the civil war.`
+  },
+  {
+    date: "October 1944",
+    title: "Battle of Leyte Gulf & Kamikaze",
+    location: "Philippine Sea",
+    body: `<p>The largest naval engagement in modern history effectively destroyed the Imperial Japanese Navy as a fighting force. The Sho-Gō plan, predicated on a desperate decoy operation, failed at Surigao Strait, the Sibuyan Sea, and off Samar. The first organised <em>tokkōtai</em> (special attack — kamikaze) missions, sanctioned by Vice-Admiral Ōnishi Takijirō, marked the institutionalisation of suicide tactics.</p>
+    <p>Kamikaze operations — eventually claiming the lives of approximately 4,000 young pilots — have become a contested cultural symbol. They were neither traditional samurai practice (which they superficially invoked) nor simple fanaticism, but a product of specific bureaucratic and ideological pressures within a collapsing war effort.</p>`,
+    historiography: `Emiko Ohnuki-Tierney (<em>Kamikaze, Cherry Blossoms, and Nationalisms</em>, 2002) draws on student-pilot diaries to demonstrate the ambivalence, despair, and intellectual sophistication of many tokkōtai pilots, dismantling the myth of fanatical volunteerism. The kamikaze phenomenon, she argues, was produced by the state's symbolic manipulation of pre-existing aesthetic traditions.`
+  },
+  {
+    date: "9–10 March 1945",
+    title: "Firebombing of Tokyo",
+    location: "Tokyo",
+    body: `<p>Operation Meetinghouse, conducted by 334 B-29 bombers under General Curtis LeMay, killed approximately 100,000 people in a single night — more than either atomic bombing — and destroyed roughly sixteen square miles of the capital. Low-altitude incendiary attacks against densely populated wooden cities continued through the spring and summer, killing hundreds of thousands more.</p>
+    <p>Strategic bombing of Japan raises enduring ethical questions, comparable to the area bombing of Germany. The defence of military necessity confronts the reality that civilian morale was the explicit target.</p>`,
+    historiography: `Mark Selden's <em>A Forgotten Holocaust</em> (2007) argues that the firebombings constituted war crimes by any standard applied to Axis behaviour. Conrad Crane and Richard Frank offer more sympathetic appraisals grounded in operational context. John Dower (<em>Cultures of War</em>, 2010) compares the moral grammars surrounding firebombing, atomic bombing, and 9/11, identifying recurring patterns of "victim consciousness" and selective memory.`
+  },
+  {
+    date: "April – June 1945",
+    title: "Battle of Okinawa",
+    location: "Ryukyu Islands",
+    body: `<p>The largest amphibious assault of the Pacific War produced 12,000 American deaths, over 100,000 Japanese military deaths, and an estimated 100,000–150,000 Okinawan civilian deaths — perhaps one-quarter of the prefecture's population. Mass civilian suicides, ordered or pressured by Japanese military personnel, remain a politically explosive issue in contemporary Japan, where textbook revisions concerning these events have sparked recurrent protests.</p>
+    <p>Okinawa's distinct identity as a formerly independent Ryukyuan kingdom annexed by Meiji Japan in 1879 complicates the war's memory there. The continued heavy US military presence on the island bears the geopolitical legacy of 1945.</p>`,
+    historiography: `Norma Field (<em>In the Realm of a Dying Emperor</em>, 1991) and Matthew Allen have examined Okinawa's distinctive memory politics, situating the battle within longer histories of internal colonialism. The contested textbook descriptions of the "compulsory mass suicides" (<em>shūdan jiketsu</em>) illustrate how 1945 remains live in Japanese public discourse.`
+  },
+  {
+    date: "6 & 9 August 1945",
+    title: "Hiroshima and Nagasaki",
+    location: "Japan",
+    body: `<p>The detonation of uranium and plutonium devices over Hiroshima and Nagasaki killed approximately 70,000 and 40,000 people instantly, with comparable numbers dying from injuries and radiation in subsequent months. The decision to use atomic weapons remains the most debated single act of the war.</p>
+    <p>The "orthodox" justification — that the bombs averted a costly invasion of Kyūshū (Operation Olympic, scheduled for November 1945) — was challenged by revisionist historians who argued that Japan was already seeking peace, that the demonstration was directed as much at Stalin as at Tokyo, and that conventional warfare or modified surrender terms could have ended the war.</p>`,
+    historiography: `Gar Alperovitz (<em>Atomic Diplomacy</em>, 1965; <em>The Decision to Use the Atomic Bomb</em>, 1995) inaugurated the revisionist literature. Tsuyoshi Hasegawa's <em>Racing the Enemy</em> (2005) — drawing on Russian, Japanese, and American sources — argues that the Soviet declaration of war on 8 August was as decisive as the bombs in producing Japanese surrender. Barton Bernstein offers a measured "middle" position. Sadao Asada emphasises that the bombs provided the "external shock" the peace faction required to overcome army intransigence within the Supreme War Council.`
+  },
+  {
+    date: "15 August / 2 September 1945",
+    title: "Surrender",
+    location: "Tokyo / USS Missouri, Tokyo Bay",
+    body: `<p>Following the Soviet invasion of Manchuria (9 August) and the second atomic bombing, Emperor Hirohito intervened in a deadlocked Supreme War Council to accept the Potsdam Declaration, conditional on the preservation of the imperial institution. The recorded broadcast (<em>gyokuon-hōsō</em>) of 15 August — in which the Emperor noted that "the war situation has developed not necessarily to Japan's advantage" — survived a last-minute coup attempt by army officers seeking to prevent its dissemination.</p>
+    <p>Formal surrender aboard the USS <em>Missouri</em> on 2 September inaugurated nearly seven years of Allied (effectively American) occupation under General Douglas MacArthur — a period that would reconstruct Japanese political and constitutional life, demilitarise the country, and incorporate it as a frontline state in the emerging Cold War.</p>`,
+    historiography: `Herbert Bix's Pulitzer-winning <em>Hirohito and the Making of Modern Japan</em> documents the Emperor's active role across the war and his exemption from prosecution at MacArthur's insistence — a decision John Dower (<em>Embracing Defeat</em>, 1999) calls central to the contradictions of the postwar order. The "surrender debate" has reshaped our understanding of the war's end as a process driven less by single catastrophic events than by the interaction of multiple shocks — atomic, Soviet, and internal — converging on a fragmented Japanese leadership.`
+  }
+];
+
+const timelineEl = document.getElementById('timeline');
+const detailEl = document.getElementById('detail');
+
+events.forEach((ev, i) => {
+  const div = document.createElement('div');
+  div.className = 'event';
+  div.innerHTML = `<div class="date">${ev.date}</div><div class="title">${ev.title}</div>`;
+  div.addEventListener('click', () => {
+    document.querySelectorAll('.event').forEach(e => e.classList.remove('active'));
+    div.classList.add('active');
+    renderDetail(ev);
+  });
+  timelineEl.appendChild(div);
+});
+
+function renderDetail(ev) {
+  detailEl.innerHTML = `
+    <h2>${ev.title}</h2>
+    <div class="meta">${ev.date} &mdash; ${ev.location}</div>
+    ${ev.body}
+    <div class="historiography">
+      <h3>Historiographical Note</h3>
+      <p>${ev.historiography}</p>
+    </div>
+  `;
+  detailEl.scrollTop = 0;
+}
+
+// Auto-load first event
+document.querySelector('.event').click();
+</script>
+
+</body>
+</html>
